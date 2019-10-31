@@ -19,6 +19,7 @@
     - setting.json
   - [x] husky
 - 👉 Typescript
-  👉[Open in Browser](https://gaengloves-react-theme.netlify.com/)
+
+👉[Open in Browser](https://gaengloves-react-theme.netlify.com/)
 
 _Thanks to Webchemist_
