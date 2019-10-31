@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import styled from "styled-components";
 import palette from "./palette";
 import uuid from "uuid";
@@ -16,16 +16,19 @@ interface IOptionProps {
 }
 const Select = ({ placeholder, children, defaultValue, ...props }: ISelectProps) => {
   const [currentValue, setCurrentValue] = useState<IOptionProps>({ children: "", value: "" });
-  const [visible, setVisible] = useState(false);
+  const [visible, setVisible] = useState<boolean>(false);
   const [groupName, setGroupName] = useState<string>("");
-
   useEffect(() => {
     setDefaultValue();
     setGroupName(uuid());
   }, []);
 
-  const handleChangeRadio = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { value } = e.currentTarget;
+  const handleChangeRadio = (value: string, children: string) => {
+    setCurrentValue({
+      value,
+      children
+    });
+    setVisible(false);
   };
 
   const setDefaultValue = () => {
@@ -38,25 +41,68 @@ const Select = ({ placeholder, children, defaultValue, ...props }: ISelectProps)
     }
   };
 
+  const handleSelectKeyboard = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    const KEY_CODE = {
+      ENTER: 13,
+      ARROW_TOP: 38,
+      ARROW_BOTTOM: 40,
+      ARROW_LEFT: 37,
+      ARROW_RIGHT: 39,
+      TAB: 9
+    };
+    switch (e.keyCode) {
+      case KEY_CODE.ENTER:
+        setVisible(!visible);
+    }
+  };
+
   return (
-    <SelectBox {...props}>
-      <SelectLabel type="text" placeholder={placeholder} value={currentValue.children} readOnly />
-      <OptionWrap>
-        {children &&
-          children.map(item => {
-            return <Option name={groupName} {...item} onChange={handleChangeRadio} key={uuid()} />;
-          })}
-      </OptionWrap>
+    <SelectBox>
+      <SelectLabel
+        type="text"
+        {...props}
+        placeholder={placeholder}
+        value={currentValue.children}
+        onClick={() => setVisible(!visible)}
+        onKeyDown={e => handleSelectKeyboard(e)}
+        readOnly
+      />
+      {visible && (
+        <OptionWrap>
+          {children &&
+            children.map(item => (
+              <Option
+                name={groupName}
+                {...item}
+                selected={currentValue.value === item.props.value}
+                onChange={handleChangeRadio}
+                key={uuid()}
+                tabIndex="0"
+              />
+            ))}
+        </OptionWrap>
+      )}
     </SelectBox>
   );
 };
 
-const Option = ({ name, props, onChange, ...others }: any) => {
+const Option = ({ name, props, onChange, tabIndex, selected, ...others }: any) => {
   const { children, ...innerOthers } = props;
+  const handleOptionKeyboard = (e: React.KeyboardEvent<HTMLLabelElement>) => {
+    if (e.keyCode === 13) {
+      onChange(innerOthers.value, children);
+    }
+  };
   return (
     <OptionItem>
-      <OptionLabel>
-        <input type="radio" name={name} onChange={e => onChange(e, children)} {...innerOthers} />
+      <OptionLabel className={selected && "on"} tabIndex={tabIndex} onKeyDown={handleOptionKeyboard}>
+        <input
+          tabIndex="-1"
+          type="radio"
+          name={name}
+          onChange={e => onChange(e.currentTarget.value, children)}
+          {...innerOthers}
+        />
         <span>{children}</span>
       </OptionLabel>
     </OptionItem>
@@ -86,6 +132,10 @@ const SelectLabel = styled.input`
   border: 1px solid #ddd;
   border-radius: 4px;
   cursor: pointer;
+
+  &:focus {
+    border-color: ${palette.primary};
+  }
 `;
 const OptionWrap = styled.ul`
   position: absolute;
@@ -94,14 +144,14 @@ const OptionWrap = styled.ul`
   left: 0;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   background-color: #fff;
-  transform: translateY(10px);
+  transform: translateY(2px);
   max-height: 200px;
   overflow-y: auto;
 `;
 const OptionItem = styled.li`
   height: 30px;
   line-height: 30px;
-  padding: 0 10px;
+  cursor: pointer;
 
   &[disabled] {
     background-color: #ddd;
@@ -129,11 +179,8 @@ const OptionLabel = styled.label`
   height: 100%;
   position: relative;
   overflow: hidden;
+  padding: 0 10px;
   cursor: inherit;
-
-  &:focus {
-    background-color: orange;
-  }
 
   input[type="radio"] {
     position: absolute;
@@ -143,6 +190,11 @@ const OptionLabel = styled.label`
       background-color: ${palette.lightPrimary};
       color: #fff;
     }
+  }
+
+  &.on {
+    background-color: ${palette.primary};
+    color: #fff;
   }
 `;
 
