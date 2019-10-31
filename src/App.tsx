@@ -7,6 +7,9 @@ const App: React.FC = () => {
   const handleChangeCheckbox = (e: React.FormEvent<HTMLInputElement>) => {
     console.log(e.currentTarget.checked);
   };
+  const sayHi = () => {
+    alert("hi!");
+  };
   return (
     <div className="App">
       <GlobalStyle />
@@ -72,7 +75,7 @@ const App: React.FC = () => {
       <Section>
         <Title>Select</Title>
         <Select placeholder="선택하세요" defaultValue="ko">
-          <Select.Option value="ko" title="한국" onClick={console.log("dd")}>
+          <Select.Option value="ko" title="한국">
             한국
           </Select.Option>
           <Select.Option value="jp">일본</Select.Option>

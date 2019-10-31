@@ -23,9 +23,11 @@ const Select = ({ placeholder, children, defaultValue, ...props }: ISelectProps)
     setDefaultValue();
     setGroupName(uuid());
   }, []);
+
   const handleChangeRadio = (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log(e);
+    const { value } = e.currentTarget;
   };
+
   const setDefaultValue = () => {
     if (defaultValue && children) {
       children.forEach(({ props }) => {
@@ -35,6 +37,7 @@ const Select = ({ placeholder, children, defaultValue, ...props }: ISelectProps)
       });
     }
   };
+
   return (
     <SelectBox {...props}>
       <SelectLabel type="text" placeholder={placeholder} value={currentValue.children} readOnly />
@@ -45,52 +48,19 @@ const Select = ({ placeholder, children, defaultValue, ...props }: ISelectProps)
           })}
       </OptionWrap>
     </SelectBox>
-    // <SelectBox>
-    //   <SelectLabel
-    //     placeholder={placeholder}
-    //     value={value ? value.label : ""}
-    //     {...props}
-    //     readOnly
-    //     onClick={() => setVisible(!visible)}
-    //   />
-    //   {visible && (
-    //     <OptionWrap>
-    //       {children.map((item: React.ReactChildren) => {
-    //         return (
-    //           <Option
-    //             {...item}
-    //             currentValue={value.value}
-    //             name={name}
-    //             onChange={(e: any) => handleChangeRadio(e, item.props.children)}
-    //             key={uuid()}
-    //           />
-    //         );
-    //       })}
-    //     </OptionWrap>
-    //   )}
-    // </SelectBox>
   );
 };
 
-const Option = (props: any) => {
-  console.log(props);
+const Option = ({ name, props, onChange, ...others }: any) => {
+  const { children, ...innerOthers } = props;
   return (
     <OptionItem>
       <OptionLabel>
-        <input type="radio" />
-        <span>{props}</span>
+        <input type="radio" name={name} onChange={e => onChange(e, children)} {...innerOthers} />
+        <span>{children}</span>
       </OptionLabel>
     </OptionItem>
   );
-  // const { props, name, currentValue, onChange } = componentProps;
-  // const { children, ...others } = props;
-  // return (
-  //   <OptionItem disabled={others.disabled} className={currentValue === others.value ? "on" : ""}>
-  //     <OptionLabel>
-  //       <input type="radio" name={name} onChange={onChange} {...others} />
-  //       <span>{children}</span>
-  //     </OptionLabel>
-  //   </OptionItem>
 };
 
 Select.Option = Option;
